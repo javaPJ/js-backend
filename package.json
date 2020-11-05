@@ -1,0 +1,27 @@
+{
+  "name": "java-pj-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/javaPJ/js-backend.git",
+  "author": "Ho-Joon-Kim <a01098930999@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "babel-node src/index.js",
+    "start:dev": "nodemon --exec babel-node src/ src/index.js --delay 2"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@koa/cors": "^3.1.0",
+    "@koa/router": "^10.0.0",
+    "dotenv": "^8.2.0",
+    "koa": "^2.13.0",
+    "koa-body": "^4.2.0",
+    "koa-logger": "^3.2.1",
+    "mariadb": "^2.5.1",
+    "sequelize": "^6.3.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
