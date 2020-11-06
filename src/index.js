@@ -7,15 +7,13 @@ import cors from '@koa/cors';
 import dotenv from 'dotenv';
 dotenv.config;
 
-<<<<<<< Updated upstream
 import api  from './api';
 //import db from './db';
-=======
+
 //import api  from './api';
 import db from './db';
 
 const models = db.models;
->>>>>>> Stashed changes
 
 const app = new Koa();
 const router = new Router();
