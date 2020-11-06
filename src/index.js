@@ -5,7 +5,7 @@ import koaBody from 'koa-body';
 import http from 'http';
 import cors from '@koa/cors';
 
-//import api  from './api';
+import api  from './api';
 //import db from './db';
 
 const app = new Koa();
@@ -17,7 +17,7 @@ app.use(koaBody());
 
 app.use(router.routes()).use(router.allowedMethods());
 
-//router.use('/api', api.routes());
+router.use('/api', api.routes());
 
 let serverCallback = app.callback();
 let httpServer = http.createServer(serverCallback);
