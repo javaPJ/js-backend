@@ -4,7 +4,7 @@ import team from './team';
 import status from './status';
 import property from './property';
 import mention from './mention';
-import teamMate from "./teamMate";
+import teamMate from './teamMate';
 
 module.exports = (Sequelize, sequelize) => {
     return {
@@ -16,4 +16,4 @@ module.exports = (Sequelize, sequelize) => {
         mention: mention(Sequelize, sequelize),
         teamMate: teamMate(Sequelize, sequelize)
     };
-}
+};

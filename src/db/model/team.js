@@ -1,25 +1,27 @@
-module.exports = (Sequelize, sequlize) => {
-    const team = sequelize.defing('team', {
+module.exports = (Sequelize, sequelize) => {
+    const team = sequelize.define('team', {
         num: {
             type: Sequelize.UUID,
             primarykey: true,
             allowNull: false
         },
         name: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         code: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         color: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         leader: {
-            type: Sequelize.UUID,
+            type: Sequelize.STRING(50),
             allowNull: false
         }
     });
-}
+    team.sync();
+    return team;
+};

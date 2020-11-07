@@ -1,6 +1,5 @@
-import Sequelize from'sequelize';
-import model from'./model'; //db 모델 require
-
+import Sequelize from 'sequelize';
+import model from './model'; //db 모델 require
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -22,4 +21,4 @@ module.exports = {
     Sequelize,
     sequelize,
     models
-}
+};

@@ -1,18 +1,21 @@
-module.exports = (Sequelize, sequlize) => {
-    const teamMate = sequelize.defing('teamMate', {
-        name: {
+module.exports = (Sequelize, sequelize) => {
+    const teamMate = sequelize.define('teamMate', {
+        num: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
             primarykey: true,
             allowNull: false
         },
         team: {
-            type: Sequelize.UUID,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         user: {
-            type: Sequelize.UUID,
+            type: Sequelize.STRING(50),
             allowNull: false
         }
     });
-}
+
+    teamMate.sync();
+    return teamMate;
+};

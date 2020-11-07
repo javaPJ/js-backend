@@ -8,8 +8,6 @@ import dotenv from 'dotenv';
 dotenv.config;
 
 import api  from './api';
-//import db from './db';
-//import api  from './api';
 import db from './db';
 
 const models = db.models;

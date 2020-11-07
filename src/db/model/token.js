@@ -1,17 +1,18 @@
-module.exports = (Sequelize, sequlize) => {
-    const token = sequelize.defing('token', {
+module.exports = (Sequelize, sequelize) => {
+    const token = sequelize.define('token', {
         name: {
-            type: Sequelize.UUID,
-            primarykey: true,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         accessToken: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         refreshToken: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         }
     });
-}
+    token.sync();
+    return token;
+};

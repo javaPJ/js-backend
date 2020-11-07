@@ -1,5 +1,5 @@
-module.exports = (Sequelize, sequlize) => {
-    const status = sequelize.defing('status', {
+module.exports = (Sequelize, sequelize) => {
+    const status = sequelize.define('status', {
         num: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -7,12 +7,14 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         },
         team: {
-            type: Sequelize.UUID,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         name: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         }
     });
-}
+    status.sync();
+    return status;
+};

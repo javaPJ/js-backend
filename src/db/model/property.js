@@ -1,5 +1,5 @@
-module.exports = (Sequelize, sequlize) => {
-    const property = sequelize.defing('property', {
+module.exports = (Sequelize, sequelize) => {
+    const property = sequelize.define('property', {
         num: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -7,15 +7,15 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         },
         team: {
-            type: Sequelize.UUID,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         status: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         color: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         index: {
@@ -23,7 +23,7 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         },
         title: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         contents: {
@@ -36,7 +36,7 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         },
         writer: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         date: {
@@ -44,4 +44,6 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         }
     });
-}
+    property.sync();
+    return property;
+};

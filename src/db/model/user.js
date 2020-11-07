@@ -1,16 +1,17 @@
-module.exports = (Sequelize, sequlize) => {
-    const user = sequelize.defing('user', {
+module.exports = (Sequelize, sequelize) => {
+    const user = sequelize.define('user', {
         num: {
-            type: Sequelize.UUID,
+            type: Sequelize.INTEGER,
+            autoIncrement: true,
             primarykey: true,
             allowNull: false
         },
         name: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         email: {
-            type: Sequelize.String(50),
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         password: {
@@ -18,4 +19,6 @@ module.exports = (Sequelize, sequlize) => {
             allowNull: false
         }
     });
-}
+    user.sync();
+    return user;
+};
