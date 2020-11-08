@@ -5,6 +5,7 @@ import status from './status';
 import property from './property';
 import mention from './mention';
 import teamMate from './teamMate';
+import emailCheck from './emailCheck';
 
 module.exports = (Sequelize, sequelize) => {
     return {
@@ -14,6 +15,7 @@ module.exports = (Sequelize, sequelize) => {
         status: status(Sequelize, sequelize),
         property: property(Sequelize, sequelize),
         mention: mention(Sequelize, sequelize),
-        teamMate: teamMate(Sequelize, sequelize)
+        teamMate: teamMate(Sequelize, sequelize),
+        emailCheck: emailCheck(Sequelize, sequelize)
     };
 };
