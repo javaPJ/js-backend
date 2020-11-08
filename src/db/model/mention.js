@@ -18,7 +18,7 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.STRING(50),
             allowNull: false
         }
-    });
+    },{freezeTableName: true});
     mention.sync();
     return mention;
 };
