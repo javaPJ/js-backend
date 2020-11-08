@@ -2,7 +2,7 @@ module.exports = (Sequelize, sequelize) => {
     const team = sequelize.define('team', {
         num: {
             type: Sequelize.UUID,
-            primarykey: true,
+            primaryKey: true,
             allowNull: false
         },
         name: {

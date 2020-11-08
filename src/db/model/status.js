@@ -3,7 +3,7 @@ module.exports = (Sequelize, sequelize) => {
         num: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
-            primarykey: true,
+            primaryKey: true,
             allowNull: false
         },
         team: {

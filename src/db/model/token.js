@@ -1,7 +1,8 @@
 module.exports = (Sequelize, sequelize) => {
     const token = sequelize.define('token', {
         name: {
-            type: Sequelize.STRING(50),
+            type: Sequelize.UUID,
+            primaryKey: true,
             allowNull: false
         },
         accessToken: {

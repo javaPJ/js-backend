@@ -3,7 +3,7 @@ module.exports = (Sequelize, sequelize) => {
         num: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
-            primarykey: true,
+            primaryKey: true,
             allowNull: false
         },
         team: {
@@ -32,17 +32,24 @@ module.exports = (Sequelize, sequelize) => {
         },
         startDate: {
             type: Sequelize.DATEONLY,
-            createAt: true,
+            allowNull: false
+        },
+        endDate: {
+            type: Sequelize.DATEONLY,
             allowNull: false
         },
         writer: {
             type: Sequelize.STRING(50),
+            defaultValue: "Sequelize.NOW",
+
             allowNull: false
         },
         date: {
             type: Sequelize.DATEONLY,
+            defaultValue: Sequelize.fn('now'),
             allowNull: false
         }
+        //
     });
     property.sync();
     return property;
