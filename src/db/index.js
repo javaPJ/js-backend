@@ -1,7 +1,8 @@
-const Sequelize = require('sequelize');
-const model = require('./model'); //db 모델 require
+import Sequelize from 'sequelize';
+import model from './model'; //db 모델 require
 
-require('dotenv').config(); // 환경 변수 
+import dotenv from 'dotenv';
+dotenv.config();
 
 const sequelize = new Sequelize(process.env.database, process.env.user, process.env.password, {
     host : process.env.host,
@@ -20,4 +21,4 @@ module.exports = {
     Sequelize,
     sequelize,
     models
-}
+};

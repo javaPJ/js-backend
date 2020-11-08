@@ -8,7 +8,9 @@ import dotenv from 'dotenv';
 dotenv.config;
 
 import api  from './api';
-//import db from './db';
+import db from './db';
+
+const models = db.models;
 
 const app = new Koa();
 const router = new Router();
