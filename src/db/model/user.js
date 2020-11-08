@@ -1,8 +1,7 @@
 module.exports = (Sequelize, sequelize) => {
     const user = sequelize.define('user', {
         num: {
-            type: Sequelize.INTEGER,
-            autoIncrement: true,
+            type: Sequelize.UUID,
             primaryKey: true,
             allowNull: false
         },
@@ -18,7 +17,8 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.TEXT,
             allowNull: false
         }
-    });
+    },{freezeTableName: true});
+
     user.sync();
     return user;
 };

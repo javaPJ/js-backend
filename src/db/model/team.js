@@ -21,7 +21,7 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.STRING(50),
             allowNull: false
         }
-    });
+    },{freezeTableName: true});
     team.sync();
     return team;
 };

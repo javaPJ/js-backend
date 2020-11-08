@@ -5,12 +5,11 @@ import koaBody from 'koa-body';
 import http from 'http';
 import cors from '@koa/cors';
 import dotenv from 'dotenv';
-dotenv.config;
+dotenv.config();
 
 import api  from './api';
 import db from './db';
 
-const models = db.models;
 
 const app = new Koa();
 const router = new Router();
