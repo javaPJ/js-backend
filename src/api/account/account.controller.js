@@ -1,4 +1,5 @@
 import mariadb from 'mariadb';//mariadb 사용 모듈
+import jwt from '../../lib/token';//mariadb 사용 모듈
 
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 dotenv.config();
@@ -11,12 +12,31 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 });
 
 
-//설명 api X
-exports.profile = (async (ctx,next) => {  
+//프로필 불러오기 api test R
+exports.profile = (async (ctx,next) => {
+  const Authentication = jwt.jwtverify(ctx.header.Authentication);
+  let status,body,sql,rows;
 
+
+  if(Authentication != ''){
+    sql = `
+    SELECT user.name,user.email,teamMate.team 
+    FROM user JOIN teamMate 
+    ON user.num = teamMate.user 
+    WHERE num = '${Authentication}';`;
+    rows = await connection.query(sql,() =>{connection.release();});
+    
+    if (rows[0] != ''){ [body,status] = [rows,200]; }
+    else{ [body,status] = [{"message" : "your data is wrong"},404]; }
+  
+  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+
+
+  ctx.status = status;
+  ctx.body = body;
 });
 
-//설명 api X
+//프로필 바꾸기 api X -> 이메일 체크 api 선완료 필
 exports.changeProfile = (async (ctx,next) => {  
 
 });
