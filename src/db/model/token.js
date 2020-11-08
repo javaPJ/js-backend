@@ -13,7 +13,8 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.STRING(50),
             allowNull: false
         }
-    });
+    },{freezeTableName: true});
+
     token.sync();
     return token;
 };

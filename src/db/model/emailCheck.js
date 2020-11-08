@@ -1,27 +1,25 @@
 module.exports = (Sequelize, sequelize) => {
-    const team = sequelize.define('team', {
-        num: {
-            type: Sequelize.UUID,
-            primaryKey: true,
+    const emailCheck = sequelize.define('emailCheck', {
+        code: {
+            type: Sequelize.STRING(6),
             allowNull: false
         },
         name: {
             type: Sequelize.STRING(50),
+            primaryKey: true,
             allowNull: false
         },
-        code: {
+        email: {
             type: Sequelize.STRING(50),
             allowNull: false
         },
-        color: {
-            type: Sequelize.STRING(50),
+        verify: {
+            type: Sequelize.BOOLEAN,
             allowNull: false
         },
-        leader: {
-            type: Sequelize.STRING(50),
-            allowNull: false
-        }
+
     },{freezeTableName: true});
-    team.sync();
-    return team;
+
+    emailCheck.sync();
+    return emailCheck;
 };

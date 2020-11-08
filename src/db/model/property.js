@@ -49,8 +49,8 @@ module.exports = (Sequelize, sequelize) => {
             defaultValue: Sequelize.fn('now'),
             allowNull: false
         }
-        //
-    });
+    },{freezeTableName: true});
+  
     property.sync();
     return property;
 };
