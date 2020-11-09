@@ -17,7 +17,13 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.TEXT,
             allowNull: false
         }
-    },{freezeTableName: true});
+    },
+    {freezeTableName: true},
+    {indexes: [
+      {unique: true,
+        fields: ['name', 'email']
+      }
+    ]});
 
     user.sync();
     return user;

@@ -21,7 +21,7 @@ exports.createProject = (async (ctx,next) => {
 
   if(Authentication != ''){
     sql = `
-    INSERT IGNORE team(num,name,code,color,leader) 
+    INSERT team(num,name,code,color,leader) 
     VALUES(CONCAT('T-',REPLACE(UUID(),'-','')), '${name}','핀만드는 라이브러리 필','r','${Authentication}');`;
     rows = await connection.query(sql,() =>{connection.release();});
 
@@ -38,7 +38,41 @@ exports.createProject = (async (ctx,next) => {
 
 //스케줄 생성 api X
 exports.createSchedule = (async (ctx,next) => {  
+  const Authentication = jwt.jwtverify(ctx.header.Authentication);
+  const { team } = ctx.request.body;//팀
+  const { stat } = ctx.request.body;//속성/현재 상황
+  const { color } = ctx.request.body;//색깔
+  const { title } = ctx.request.body;//스레드 제목
+  const { contents } = ctx.request.body;//스레드 내용
+  const { startDate } = ctx.request.body;//스케줄 시작 날짜
+  const { endDate } = ctx.request.body;//스케줄 완료 날짜
+  const { writer } = ctx.request.body;//스레드 작성자
+  const { member } = ctx.request.body;//멘션된 멤버
+  let status,body,sql,rows;
 
+
+  if(Authentication != ''){
+
+    sql = `
+    INSERT property(team,status,color,index,title,contents,startDate,endDate,writer) 
+    VALUES('${team}', '${stat}', '${color}', (SELECT MAX(index) FROM property)+1, '${title}', '${contents}', '${startDate}', '${startDate}','${writer}');`;
+    rows = await connection.query(sql,() =>{connection.release();});
+
+    member.forEach(async member => {
+      sql = `
+      INSERT mention(team,status, properties, user) 
+      VALUES((SELECT num FROM team WHERE name = '${team}'), (SELECT MAX(num) FROM property)+1, (SELECT num FROM user WHERE name = '${member}'));`;
+      await connection.query(sql,() =>{connection.release();});
+    });
+
+    if (rows) { [body,status] = ['', 201]; }
+    else{ [body,status] = [{"message" : "err for something"}, 403]; }
+  
+  }else{ [body,status] = [{"message" : "your token is wrong"}, 404]; }
+
+
+  ctx.status = status;
+  ctx.body = body;
 });
 
 //프로잭트 불러오기 api X
