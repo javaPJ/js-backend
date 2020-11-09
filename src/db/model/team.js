@@ -21,7 +21,14 @@ module.exports = (Sequelize, sequelize) => {
             type: Sequelize.STRING(50),
             allowNull: false
         }
-    },{freezeTableName: true});
+    },
+    {freezeTableName: true},
+    {indexes: [
+      {unique: true,
+        fields: ['name', 'code']
+      }
+    ]});
+
     team.sync();
     return team;
 };
