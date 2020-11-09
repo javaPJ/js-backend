@@ -1,4 +1,5 @@
 import mariadb from 'mariadb';//mariadb 사용 모듈
+import jwt from '../../lib/token';//mariadb 사용 모듈
 
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 dotenv.config();
@@ -35,7 +36,7 @@ exports.profile = (async (ctx,next) => {
   ctx.body = body;
 });
 
-//설명 api X
+//프로필 바꾸기 api X -> 이메일 체크 api 선완료 필
 exports.changeProfile = (async (ctx,next) => {  
 
 });
