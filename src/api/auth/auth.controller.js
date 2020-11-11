@@ -49,13 +49,26 @@ exports.signup = (async (ctx,next) => {
 	console.log(rows);
 	if(rows){ [body,status] = ['', 201]; }
 	else { [body, status] = [{"message" : "your id or password or email wrong"}, 403] };
+
+	ctx.body = body;
+	ctx.status = status;
 });
-//설명 api X
+
+//id 중복 체크할 때 사용하는 api
 exports.idCheck = (async (ctx,next) => {  
 	const { id } = ctx.request.query;
-	let sql;
+	let sql, rows, body, status;
+
 	sql = `SELECT name FROM USER WHERE name = '${id}'`;
+	rows = await connection.query(sql, () => {connection. release();});
+	
+	if(rows[0] === undefined){ [body, status] = ["", 200] }
+	else { [body, status] = [{"message" : "you can't use that id"}, 403] };
+
+	ctx.body = body;
+	ctx.status = status;
 });
+
 //설명 api X
 exports.emailSend = (async (ctx,next) => {  
 
