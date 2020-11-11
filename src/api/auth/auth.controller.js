@@ -10,7 +10,7 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
     database: process.env.database
 });
 
-//설명 api X
+//로그인시에 쓰이는 api
 exports.login = (async (ctx,next) => {
 	const { email, password } = ctx.request.body;
 	let status,body,sql,rows, token, refreshToken;
@@ -30,7 +30,7 @@ exports.login = (async (ctx,next) => {
 
 	if (rows[0] === undefined) {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { [body,status,token,refreshToken] = ['', 201, jwt.jwtsign('user1'), jwt.jwtrefresh(email)]; }
+	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign('user1'), await jwt.jwtrefresh(email)]; }
 
 	ctx.status = status;
 	ctx.body = body;
@@ -38,13 +38,23 @@ exports.login = (async (ctx,next) => {
   ctx.cookies.set("refresh_token", refreshToken, { httpOnly: true });
 });
 
-//설명 api X
+//회원 가입할 때 사용하는 api
 exports.signup = (async (ctx,next) => {  
+	const { id, email, password } = ctx.request.body;
+	let sql, rows, status, body;
 
+	sql = `INSERT INTO user(name, email, password) VALUES ("'${id}', '${email}', '${password}'")`;
+	rows = await connection.query(sql, () => {connection. release();});
+
+	console.log(rows);
+	if(rows){ [body,status] = ['', 201]; }
+	else { [body, status] = [{"message" : "your id or password or email wrong"}, 403] };
 });
 //설명 api X
 exports.idCheck = (async (ctx,next) => {  
-
+	const { id } = ctx.request.query;
+	let sql;
+	sql = `SELECT name FROM USER WHERE name = '${id}'`;
 });
 //설명 api X
 exports.emailSend = (async (ctx,next) => {  
