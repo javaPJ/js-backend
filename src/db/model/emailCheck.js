@@ -6,18 +6,15 @@ module.exports = (Sequelize, sequelize) => {
         type: Sequelize.STRING(6),
         allowNull: false,
       },
-      name: {
-        type: Sequelize.STRING(50),
-        primaryKey: true,
-        allowNull: false,
-      },
       email: {
         type: Sequelize.STRING(50),
+        primaryKey: true,
         allowNull: false,
       },
       verify: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
     },
     { freezeTableName: true }
