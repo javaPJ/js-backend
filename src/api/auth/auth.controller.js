@@ -70,63 +70,61 @@ exports.idCheck = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//email 전송할 때 사용하는 api x
+//email 전송할 때 사용하는 api O
 exports.emailSend = (async (ctx,next) => {  
 	const { email } = ctx.request.body;
-	let sql, rows,body, status, code;
+	let sql, rows,body, code, status;
+
+	sql = `SELECT email FROM emailCheck WHERE email = '${email}';`;
+	rows = await connection.query(sql, () => {connection. release();});
+
+	if(rows[0] != undefined){
+		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
+		rows = await connection.query(sql, () => {connection. release();});
+	}
+	else{ [body, status] = [{"message" : "email already sent"}, 403] };
 
 	code = Math.floor(Math.random() * 1000000)+100000;
 	if(code>1000000){
    	code = code - 100000;
 	}
 
-	sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
-	rows = await connection.query(sql, () => {connection. release();});
-
-	const transporter = nodemailer.createTestAccount({
-		service : process.env.MAILSERVICE,
+	const transporter = nodemailer.createTransport({
+		service: process.env.MAILSERVICE,
+		port : 587,
 		auth : {
-			user : MAILID,
-			password : MAILPASSWORD
+			user : process.env.MAILID,
+			pass : process.env.MAILPASSWORD
 		}
 	});
 
-	const mailoption = {
-		from: MAILID,
-		to: 'caroink@dsm.hs.kr', //email로 바꿀 예정
+	await transporter.sendMail({
+		from: process.env.MAILID,
+		to: 'caroink@naver.com', //email로 바꿀 예정
 		subject: 'HELLO',
-		text: code
-	}
-
-	transporter.sendMail(mailoption, (error, info) => {
-		if(error) {
-			console.log(error);
-			[body, status] = [{"message" :"email send failed"}, 404];
-		}
-		else{
-			console.log(`message sent: ${info.response}`);
-			[body, status] = ["", 201];
-		}
-		transporter.close();
+		text: 'asdfasdfsdaf'
 	});
+
+	[body, status] = ["", 202];
 
 	ctx.body = body;
 	ctx.status = status;
 });
 
-//email code 체크할 때 사용하는 api x
+//email code 체크할 때 사용하는 api O
 exports.emailCheck = (async (ctx,next) => {  
 	const { code, email } = ctx.request.query;
 	let sql, rows,body, status;
 
-	sql = `SELECT verify FROM emailCheck WHERE code = '${code}' AND email = '${email}';`;
+	sql = `SELECT email FROM emailCheck WHERE code = '${code}' AND email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
 	if(rows[0] === undefined){
 		[body,status] = [{"message" : "code is wrong"}, 404];
 	}
 	else{
-		sql = `DELETE FROM emailCheck WHERE email = '${email}';`
+		sql = `DELETE FROM emailCheck WHERE email = '${email}';`;
+		rows = await connection.query(sql, () => {connection.release();});
 		[body, status] = ["", 202];
 	}
 	ctx.body = body;
