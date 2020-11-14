@@ -6,10 +6,10 @@ import authCtrl from './auth.controller';
 
 auth.post('/login', authCtrl.login);
 auth.post('/signup', authCtrl.signup);
-auth.get('/idCheck', authCtrl.idCheck);
-auth.post('/emailSend', authCtrl.emailSend);
-auth.get('/emailCheck', authCtrl.emailCheck);
-auth.post('/findPassword', authCtrl.findPassword);
-auth.get('/refreshToken', authCtrl.refreshToken);
+auth.get('/idcheck/:email', authCtrl.idCheck);
+auth.post('/emailsend', authCtrl.emailSend);
+auth.get('/emailcheck', authCtrl.emailCheck);
+auth.post('/findpassword', authCtrl.findPassword);
+auth.get('/refreshtoken', authCtrl.refreshToken);
 
 module.exports = auth;
