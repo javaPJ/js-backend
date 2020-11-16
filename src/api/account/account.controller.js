@@ -17,7 +17,6 @@ exports.profile = (async (ctx,next) => {
   const Authentication = jwt.jwtverify(ctx.header.Authentication);
   let status,body,sql,rows;
 
-
   if(Authentication != ''){
     sql = `
     SELECT user.name,user.email,teamMate.team 
@@ -27,16 +26,31 @@ exports.profile = (async (ctx,next) => {
     rows = await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},404]; }
+    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
   
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
-
 
   ctx.status = status;
   ctx.body = body;
 });
 
-//프로필 바꾸기 api X -> 이메일 체크 api 선완료 필
-exports.changeProfile = (async (ctx,next) => {  
+//프로필 바꾸기 api test R
+exports.changeProfile = (async (ctx,next) => {
+  const Authentication = jwt.jwtverify(ctx.header.Authentication);
+  const { nickname } = ctx.request.body;
+  const password = crypto.createHmac('sha256', process.env.secret).update(ctx.request.body.password).digest('hex');
+  let status,body,sql,rows;
+
+  if(Authentication != ''){
+    sql = `UPDATE user SET name = '${Authentication}', password = '${password}' WHERE name = '${Authentication}';`;
+    rows = await connection.query(sql,() =>{connection.release();});
+    
+    if (rows[0] != ''){ [body,status] = [rows,200]; }
+    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
+  
+  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+
+  ctx.status = status;
+  ctx.body = body;
 
 });
