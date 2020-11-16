@@ -2,9 +2,19 @@ import mariadb from 'mariadb';//mariadb 사용 모듈
 import nodemailer from 'nodemailer'//email 전송 모듈
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 import jwt from '../../lib/token';//token lib
+import controller from '../../lib/controller';//controller lib
 import crypto from 'crypto';//암호화 모듈
 
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+	service: process.env.MAILSERVICE,
+	port : 587,
+	auth : {
+		user : process.env.MAILID,
+		pass : process.env.MAILPASSWORD
+	}
+});
 
 const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 환경변수로 설정.
     host: process.env.host,
@@ -25,7 +35,7 @@ exports.login = (async (ctx,next) => {
 
 	if (rows[0] === undefined) {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]), await jwt.jwtrefresh(email)]; }
+	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['name']), await jwt.jwtrefresh(email)]; }
 
 	sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
 	rows = await connection.query(sql,() =>{connection.release();}); //????????????? 대체 얼마나 긴거야
@@ -84,16 +94,7 @@ exports.emailSend = (async (ctx,next) => {
 	if(rows[0] === undefined){
 		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
 		rows = await connection.query(sql, () => {connection. release();});
-	
-		const transporter = nodemailer.createTransport({
-			service: process.env.MAILSERVICE,
-			port : 587,
-			auth : {
-				user : process.env.MAILID,
-				pass : process.env.MAILPASSWORD
-			}
-		});
-	
+
 		await transporter.sendMail({
 			from: process.env.MAILID,
 			to: `${email}`, //email로 바꿀 예정
@@ -132,13 +133,27 @@ exports.emailCheck = (async (ctx,next) => {
 //비밀번호를 찾을 때 사용하는 api X
 exports.findPassword = (async (ctx,next) => {  
 	const { id, email } = ctx.request.body;
-	let sql, rows, body, status;
+	let sql, rows, pass, body, status;
 
-	sql = `SELECT password FROM user WHERE name = '${id}' AND email = '${email}';`;
+	sql = `SELECT UUID FROM user WHERE name = '${id}' AND email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
 	if(rows[0] === undefined){ [body, status] = [{"message" : "id or email is wrong"}, 404] }
-	else { [body, status] = [rows[0], 200] };
+	else { 
+		pass = await controller.createRandomString();
+		
+		sql = `UPDATE user SET password = "${pass}" WHERE name = "${id}";`;
+		rows = await connection.query(sql, () => {connection.release();});
+		
+		await transporter.sendMail({
+			from: process.env.MAILID,
+			to: `${email}`,
+			subject: 'Your pass',
+			text: `${pass}`
+		});
+
+		[body, status] = [pass, 200];
+	};
 
 	ctx.body = body;
 	ctx.status = status;
@@ -155,7 +170,7 @@ exports.refreshToken = (async (ctx,next) => {
 	if(rows[0] === undefined){
 		[body, status] = [{"message" : "not correct refresh token"}, 404];
 	}else{
-		[body, status, token] = ["", 202, await jwt.jwtsign(rows[0])];
+		[body, status, token] = ["", 202, await jwt.jwtsign(rows[0]['name'])];
 	}
 
 	ctx.body = body;
