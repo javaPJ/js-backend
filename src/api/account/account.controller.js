@@ -34,7 +34,7 @@ exports.profile = (async (ctx,next) => {
   ctx.body = body;
 });
 
-//프로필 바꾸기 api X
+//프로필 바꾸기 api test R
 exports.changeProfile = (async (ctx,next) => {
   const Authentication = jwt.jwtverify(ctx.header.Authentication);
   const { nickname } = ctx.request.body;
