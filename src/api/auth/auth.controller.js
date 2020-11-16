@@ -18,7 +18,7 @@ exports.login = (async (ctx,next) => {
 	const { email, password } = ctx.request.body;
 	let status,body,sql,rows, token, refreshToken;
 
-	const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
+	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
 	sql = `SELECT name FROM user WHERE email = '${email}' AND password = '${password}';`;
 	rows = await connection.query(sql,() =>{connection.release();});
@@ -44,7 +44,7 @@ exports.signup = (async (ctx,next) => {
 	const { id, email, password } = ctx.request.body;
 	let sql, rows, status, body;
 
-	const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
+	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
 	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${password}");`;
 	rows = await connection.query(sql, () => {connection. release();});
