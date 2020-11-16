@@ -2,6 +2,8 @@ import mariadb from 'mariadb';//mariadb 사용 모듈
 import nodemailer from 'nodemailer'//email 전송 모듈
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 import jwt from '../../lib/token';//token lib
+import crypto from 'crypto';//암호화 모듈
+
 dotenv.config();
 
 const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 환경변수로 설정.
@@ -16,22 +18,20 @@ exports.login = (async (ctx,next) => {
 	const { email, password } = ctx.request.body;
 	let status,body,sql,rows, token, refreshToken;
 
-	const cookieOptions = { 
-		httpOnly: true,
-		secure: true,
-		signed: true,
-		overwrite: true
-	}
+	const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
 	sql = `SELECT name FROM user WHERE email = '${email}' AND password = '${password}';`;
 	rows = await connection.query(sql,() =>{connection.release();});
 
-	console.log(rows[0]);
-	console.log(email);
-
 	if (rows[0] === undefined) {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign('user1'), await jwt.jwtrefresh(email)]; }
+	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]), await jwt.jwtrefresh(email)]; }
+
+	console.log(token.length);
+	console.log(refreshToken.length);
+
+	sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
+	rows = await connection.query(sql,() =>{connection.release();}); //????????????? 대체 얼마나 긴거야
 
 	ctx.status = status;
 	ctx.body = body;
@@ -43,6 +43,8 @@ exports.login = (async (ctx,next) => {
 exports.signup = (async (ctx,next) => {  
 	const { id, email, password } = ctx.request.body;
 	let sql, rows, status, body;
+
+	const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
 	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${password}");`;
 	rows = await connection.query(sql, () => {connection. release();});
@@ -78,16 +80,16 @@ exports.emailSend = (async (ctx,next) => {
 	sql = `SELECT email FROM emailCheck WHERE email = '${email}';`;
 	rows = await connection.query(sql, () => {connection. release();});
 
-	if(rows[0] != undefined){
-		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
-		rows = await connection.query(sql, () => {connection. release();});
-	}
-	else{ [body, status] = [{"message" : "email already sent"}, 403] };
-
 	code = Math.floor(Math.random() * 1000000)+100000;
 	if(code>1000000){
    	code = code - 100000;
 	}
+
+	if(rows[0] === undefined){
+		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
+		rows = await connection.query(sql, () => {connection. release();});
+	}
+	else{ [body, status] = [{"message" : "email already sent"}, 403] };
 
 	const transporter = nodemailer.createTransport({
 		service: process.env.MAILSERVICE,
@@ -102,7 +104,7 @@ exports.emailSend = (async (ctx,next) => {
 		from: process.env.MAILID,
 		to: 'caroink@naver.com', //email로 바꿀 예정
 		subject: 'HELLO',
-		text: 'asdfasdfsdaf'
+		text: 'asdfasdf'
 	});
 
 	[body, status] = ["", 202];
@@ -131,7 +133,7 @@ exports.emailCheck = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//비밀번호를 찾을 때 사용하는 api X
+//비밀번호를 찾을 때 사용하는 api O
 exports.findPassword = (async (ctx,next) => {  
 	const { id, email } = ctx.request.body;
 	let sql, rows, body, status;
@@ -146,12 +148,14 @@ exports.findPassword = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//accrss token 재발급시 사용하는 api x
+//access token 재발급시 사용하는 api O
 exports.refreshToken = (async (ctx,next) => {  
-	const { refreshToken } = ctx.request.header;
+	const { refreshtoken } = ctx.request.header;
 	let sql, rows, token, body, status;
-	
-	sql = `SELECT user.name FROM user, token WHERE token.refreshToken = '${refreshToken}';`;
+
+	console.log(refreshtoken);
+
+	sql = `SELECT email FROM token WHERE refreshToken = '${refreshtoken}';`;
 	rows = await connection.query(sql, () => {connection. release();});
 
 	if(rows[0] === undefined){
