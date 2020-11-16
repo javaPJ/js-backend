@@ -12,23 +12,24 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 });
 
 
-//프로필 불러오기 api test R
+//프로필 불러오기 api O
 exports.profile = (async (ctx,next) => {
-  const Authentication = jwt.jwtverify(ctx.header.Authentication);
-  let status,body,sql,rows;
+  let authentication = await jwt.jwtverify(ctx.header.authentication);;
+  let status,body,sql,rows,rows1;
 
-  if(Authentication != ''){
-    sql = `
-    SELECT user.name,user.email,teamMate.team 
-    FROM user JOIN teamMate 
-    ON user.num = teamMate.user 
-    WHERE num = '${Authentication}';`;
+
+  if(authentication != ''){
+    sql = `SELECT email FROM user WHERE name = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
+    console.log(rows[0]);
+    sql = `SELECT team FROM teamMate WHERE user = (SELECT num FROM user WHERE name = '${authentication}');`;
+    rows1 = await connection.query(sql,() =>{connection.release();});
+    if (rows1[0] == undefined) { rows1 = [{'team' : ''}]; }
+
+    if (rows[0] != ''){ [body,status] = [{'email' : rows[0]['email'], 'team' : rows1[0]['team']},200]; }
+    else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
   
-  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+  }else{ [body,status] = [{'message' : 'your token is wrong'},404]; }
 
   ctx.status = status;
   ctx.body = body;
@@ -36,19 +37,19 @@ exports.profile = (async (ctx,next) => {
 
 //프로필 바꾸기 api test R
 exports.changeProfile = (async (ctx,next) => {
-  const Authentication = jwt.jwtverify(ctx.header.Authentication);
+  const authentication = jwt.jwtverify(ctx.header.authentication);
   const { nickname } = ctx.request.body;
   const password = crypto.createHmac('sha256', process.env.secret).update(ctx.request.body.password).digest('hex');
   let status,body,sql,rows;
 
-  if(Authentication != ''){
-    sql = `UPDATE user SET name = '${Authentication}', password = '${password}' WHERE name = '${Authentication}';`;
+  if(authentication != ''){
+    sql = `UPDATE user SET name = '${authentication}', password = '${password}' WHERE name = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
+    else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
   
-  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+  }else{ [body,status] = [{'message' : 'your token is wrong'},404]; }
 
   ctx.status = status;
   ctx.body = body;
