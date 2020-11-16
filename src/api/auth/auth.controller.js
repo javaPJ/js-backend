@@ -20,7 +20,7 @@ exports.login = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `SELECT name FROM user WHERE email = '${email}' AND password = '${password}';`;
+	sql = `SELECT name FROM user WHERE email = '${email}' AND password = '${pass}';`;
 	rows = await connection.query(sql,() =>{connection.release();});
 
 	if (rows[0] === undefined) {
@@ -43,7 +43,7 @@ exports.signup = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${password}");`;
+	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${pass}");`;
 	rows = await connection.query(sql, () => {connection. release();});
 
 	if(rows){ [body,status] = ['', 201]; }
@@ -129,7 +129,7 @@ exports.emailCheck = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//비밀번호를 찾을 때 사용하는 api O
+//비밀번호를 찾을 때 사용하는 api X
 exports.findPassword = (async (ctx,next) => {  
 	const { id, email } = ctx.request.body;
 	let sql, rows, body, status;
