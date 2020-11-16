@@ -142,12 +142,14 @@ exports.findPassword = (async (ctx,next) => {
 	else { 
 		pass = await controller.createRandomString();
 		
-		sql = `UPDATE user SET password = "${pass}" WHERE name = "${id}";`;
+		const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
+
+		sql = `UPDATE user SET password = "${password}" WHERE name = "${id}";`;
 		rows = await connection.query(sql, () => {connection.release();});
 		
 		await transporter.sendMail({
 			from: process.env.MAILID,
-			to: 'caroink@naver.com',
+			to: `${email}`,
 			subject: 'Your pass',
 			text: `${pass}`
 		});
