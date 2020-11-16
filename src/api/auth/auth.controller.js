@@ -130,12 +130,12 @@ exports.emailCheck = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//비밀번호를 찾을 때 사용하는 api X
+//비밀번호를 찾을 때 사용하는 api O
 exports.findPassword = (async (ctx,next) => {  
 	const { id, email } = ctx.request.body;
 	let sql, rows, pass, body, status;
 
-	sql = `SELECT UUID FROM user WHERE name = '${id}' AND email = '${email}';`;
+	sql = `SELECT num FROM user WHERE name = '${id}' AND email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
 	if(rows[0] === undefined){ [body, status] = [{"message" : "id or email is wrong"}, 404] }
@@ -147,7 +147,7 @@ exports.findPassword = (async (ctx,next) => {
 		
 		await transporter.sendMail({
 			from: process.env.MAILID,
-			to: `${email}`,
+			to: 'caroink@naver.com',
 			subject: 'Your pass',
 			text: `${pass}`
 		});
