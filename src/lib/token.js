@@ -15,7 +15,7 @@ exports.jwtrefresh = (async (email) => { // refresh token 반환
 exports.jwtverify = (async (token) => {
   let over;
   await jwt.verify(token, process.env.secretjwt, (error, decoded) => {
-    if(error){ return ''; }
+    if(error){ over = ''; }
     else{ over = decoded['id']; }
   });
   return over;
