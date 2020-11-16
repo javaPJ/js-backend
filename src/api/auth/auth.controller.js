@@ -27,9 +27,6 @@ exports.login = (async (ctx,next) => {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
 	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]), await jwt.jwtrefresh(email)]; }
 
-	console.log(token.length);
-	console.log(refreshToken.length);
-
 	sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
 	rows = await connection.query(sql,() =>{connection.release();}); //????????????? 대체 얼마나 긴거야
 
@@ -49,7 +46,6 @@ exports.signup = (async (ctx,next) => {
 	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${password}");`;
 	rows = await connection.query(sql, () => {connection. release();});
 
-	console.log(rows);
 	if(rows){ [body,status] = ['', 201]; }
 	else { [body, status] = [{"message" : "your id or password or email wrong"}, 403] };
 
@@ -100,12 +96,10 @@ exports.emailSend = (async (ctx,next) => {
 	
 		await transporter.sendMail({
 			from: process.env.MAILID,
-			to: 'caroink@naver.com', //email로 바꿀 예정
+			to: `${email}`, //email로 바꿀 예정
 			subject: 'HELLO',
-			text: 'asdfasdf'
+			text: `${code}`
 		});
-
-		console.log('asdf');
 
 		[body, status] = ["", 202];
 	}
@@ -154,8 +148,6 @@ exports.findPassword = (async (ctx,next) => {
 exports.refreshToken = (async (ctx,next) => {  
 	const { refreshtoken } = ctx.request.header;
 	let sql, rows, token, body, status;
-
-	console.log(refreshtoken);
 
 	sql = `SELECT email FROM token WHERE refreshToken = '${refreshtoken}';`;
 	rows = await connection.query(sql, () => {connection. release();});
