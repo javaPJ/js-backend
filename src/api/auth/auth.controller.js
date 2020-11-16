@@ -88,26 +88,28 @@ exports.emailSend = (async (ctx,next) => {
 	if(rows[0] === undefined){
 		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
 		rows = await connection.query(sql, () => {connection. release();});
+	
+		const transporter = nodemailer.createTransport({
+			service: process.env.MAILSERVICE,
+			port : 587,
+			auth : {
+				user : process.env.MAILID,
+				pass : process.env.MAILPASSWORD
+			}
+		});
+	
+		await transporter.sendMail({
+			from: process.env.MAILID,
+			to: 'caroink@naver.com', //email로 바꿀 예정
+			subject: 'HELLO',
+			text: 'asdfasdf'
+		});
+
+		console.log('asdf');
+
+		[body, status] = ["", 202];
 	}
 	else{ [body, status] = [{"message" : "email already sent"}, 403] };
-
-	const transporter = nodemailer.createTransport({
-		service: process.env.MAILSERVICE,
-		port : 587,
-		auth : {
-			user : process.env.MAILID,
-			pass : process.env.MAILPASSWORD
-		}
-	});
-
-	await transporter.sendMail({
-		from: process.env.MAILID,
-		to: 'caroink@naver.com', //email로 바꿀 예정
-		subject: 'HELLO',
-		text: 'asdfasdf'
-	});
-
-	[body, status] = ["", 202];
 
 	ctx.body = body;
 	ctx.status = status;
