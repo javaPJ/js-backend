@@ -130,19 +130,21 @@ exports.emailCheck = (async (ctx,next) => {
 	ctx.status = status;
 });
 
-//비밀번호를 찾을 때 사용하는 api X
+//비밀번호를 찾을 때 사용하는 api O
 exports.findPassword = (async (ctx,next) => {  
 	const { id, email } = ctx.request.body;
 	let sql, rows, pass, body, status;
 
-	sql = `SELECT UUID FROM user WHERE name = '${id}' AND email = '${email}';`;
+	sql = `SELECT num FROM user WHERE name = '${id}' AND email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
 	if(rows[0] === undefined){ [body, status] = [{"message" : "id or email is wrong"}, 404] }
 	else { 
 		pass = await controller.createRandomString();
 		
-		sql = `UPDATE user SET password = "${pass}" WHERE name = "${id}";`;
+		const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
+
+		sql = `UPDATE user SET password = "${password}" WHERE name = "${id}";`;
 		rows = await connection.query(sql, () => {connection.release();});
 		
 		await transporter.sendMail({
