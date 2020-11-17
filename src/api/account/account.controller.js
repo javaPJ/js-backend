@@ -1,5 +1,6 @@
 import mariadb from 'mariadb';//mariadb 사용 모듈
 import jwt from '../../lib/token';//mariadb 사용 모듈
+import crypto from 'crypto';//암호화 모듈
 
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 dotenv.config();
@@ -12,45 +13,49 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 });
 
 
-//프로필 불러오기 api test R
+//프로필 불러오기 api O
 exports.profile = (async (ctx,next) => {
-  const Authentication = jwt.jwtverify(ctx.header.Authentication);
-  let status,body,sql,rows;
+  let authentication = await jwt.jwtverify(ctx.header.authentication);;
+  let status,body,sql,rows,rows1;
 
-  if(Authentication != ''){
-    sql = `
-    SELECT user.name,user.email,teamMate.team 
-    FROM user JOIN teamMate 
-    ON user.num = teamMate.user 
-    WHERE num = '${Authentication}';`;
+  if(authentication != ''){
+    console.log(authentication);
+    sql = `SELECT name,email FROM user WHERE num = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
+    sql = `SELECT team FROM teamMate WHERE user = '${authentication}';`;
+    rows1 = await connection.query(sql,() =>{connection.release();});
+
+    if (rows1[0] == undefined) { rows[0]['team'] = ''; }
+    else { rows[0]['team'] = rows1[0]['team']; }
+
+    if (rows[0] != ''){ [body,status] = [rows[0], 200]; }
+    else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
   
-  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+  }else{ [body,status] = [{'message' : 'your token is wrong'},404]; }
 
   ctx.status = status;
   ctx.body = body;
 });
 
-//프로필 바꾸기 api test R
+//프로필 바꾸기 api O
 exports.changeProfile = (async (ctx,next) => {
-  const Authentication = jwt.jwtverify(ctx.header.Authentication);
+  const authentication = await jwt.jwtverify(ctx.header.authentication);
   const { nickname } = ctx.request.body;
-  const password = crypto.createHmac('sha256', process.env.secret).update(ctx.request.body.password).digest('hex');
+  let { password } = ctx.request.body;
   let status,body,sql,rows;
 
-  if(Authentication != ''){
-    sql = `UPDATE user SET name = '${Authentication}', password = '${password}' WHERE name = '${Authentication}';`;
-    rows = await connection.query(sql,() =>{connection.release();});
+  if(authentication != ''){
+    if (password) {
+      password = crypto.createHmac('sha256', process.env.secret).update(password).digest('hex');
+      sql = `UPDATE user SET password = '${password}' WHERE num = '${authentication}';`;
+      await connection.query(sql,() =>{connection.release();});
+    }
+    sql = `UPDATE user SET name = '${nickname}' WHERE num = '${authentication}';`;
+    await connection.query(sql,() =>{connection.release();});
     
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-  
-  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+    [body,status] = ['',201];
+  }else{ [body,status] = [{'message' : 'your token is wrong'},404]; }
 
   ctx.status = status;
   ctx.body = body;
-
 });
