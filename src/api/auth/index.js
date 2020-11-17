@@ -11,5 +11,7 @@ auth.post('/emailsend', authCtrl.emailSend);
 auth.get('/emailcheck', authCtrl.emailCheck);
 auth.post('/findpassword', authCtrl.findPassword);
 auth.get('/refreshtoken', authCtrl.refreshToken);
+auth.post('/logout', authCtrl.logout);
+
 
 module.exports = auth;

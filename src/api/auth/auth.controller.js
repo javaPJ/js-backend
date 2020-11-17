@@ -35,15 +35,36 @@ exports.login = (async (ctx,next) => {
 
 	if (rows[0] === undefined) {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; }
+	} else { 
 
-	sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
-	rows = await connection.query(sql,() =>{connection.release();}); //????????????? 대체 얼마나 긴거야
+		[body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; 
+
+		sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
+		rows = await connection.query(sql,() =>{connection.release();});
+	}
 
 	ctx.status = status;
 	ctx.body = body;
 	ctx.cookies.set('access_token', token, { httpOnly: true });
   ctx.cookies.set("refresh_token", refreshToken, { httpOnly: true });
+});
+
+//로그 아웃할 때 사용하는 api O
+exports.logout = (async (ctx, next) => {
+	const auth = ctx.header.authentication;
+	const authentication = await jwt.jwtverify(auth);
+	let sql, rows, body, status;
+
+	if(authentication != ''){
+		sql = `DELETE FROM token WHERE accessToken = "${auth}";`;
+		rows = await connection.query(sql,() =>{connection.release();});
+
+		[body, status] = ["", 201];
+
+	}else{ [body,status] = [ {"message" : "your token is wrong"},404]; }
+
+	ctx.body = body;
+	ctx.status = status;
 });
 
 //회원 가입할 때 사용하는 api O
