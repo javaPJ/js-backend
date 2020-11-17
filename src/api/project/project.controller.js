@@ -13,23 +13,21 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 });
 
 
-//프로젝트 생성 api 핀만드는 라이브러리 필요
+//프로젝트 생성 api O
 exports.createProject = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
   const code = await pin.makePin('team','code');
   const { name } = ctx.request.body;
   const { color } = ctx.request.body;
-  let status,body,sql,rows;
+  let status,body,sql;
 
   if(authentication != ''){
     sql = `
     INSERT team(num,name,code,color,leader) 
     VALUES(CONCAT('T-',REPLACE(UUID(),'-','')), '${name}','${code}','${color}','${authentication}');`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    await connection.query(sql,() =>{connection.release();});
 
-    if (rows) { [body,status] = ['', 201]; }
-    else{ [body,status] = [{"message" : "duplicate project exist"}, 403]; }
-  
+    [body,status] = ['', 201];
   }else{ [body,status] = [{"message" : "your token is wrong"}, 404]; }
 
 
