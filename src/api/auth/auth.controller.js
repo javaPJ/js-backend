@@ -30,12 +30,12 @@ exports.login = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `SELECT name FROM user WHERE email = '${email}' AND password = '${pass}';`;
+	sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
 	rows = await connection.query(sql,() =>{connection.release();});
 
 	if (rows[0] === undefined) {
 		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['name']), await jwt.jwtrefresh(email)]; }
+	} else { [body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; }
 
 	sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
 	rows = await connection.query(sql,() =>{connection.release();}); //????????????? 대체 얼마나 긴거야
