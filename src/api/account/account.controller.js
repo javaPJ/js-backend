@@ -19,14 +19,14 @@ exports.profile = (async (ctx,next) => {
   let status,body,sql,rows,rows1;
 
   if(authentication != ''){
-    console.log(authentication);
     sql = `SELECT name,email FROM user WHERE num = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    sql = `SELECT team FROM teamMate WHERE user = '${authentication}';`;
+    sql = `SELECT team FROM teamMate WHERE user = '${authentication}' UNION
+           SELECT num as team FROM team WHERE leader = '${authentication}';`;
     rows1 = await connection.query(sql,() =>{connection.release();});
 
-    if (rows1[0] == undefined) { rows[0]['team'] = ''; }
-    else { rows[0]['team'] = rows1[0]['team']; }
+    if (rows1[0] == undefined) { rows[0]['team'] = []; }
+    else { rows[0]['team'] = rows1; }
 
     if (rows[0] != ''){ [body,status] = [rows[0], 200]; }
     else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
