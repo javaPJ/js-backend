@@ -99,7 +99,7 @@ exports.idCheck = (async (ctx,next) => {
 	const { email } = ctx.request.params;
 	let sql, rows, body, status;
 
-	sql = `SELECT email FROM USER WHERE email = '${email}'`;
+	sql = `SELECT email FROM user WHERE email = '${email}'`;
 	rows = await connection.query(sql, () => {connection. release();});
 	
 	if(rows[0] === undefined){ [body, status] = ["", 200]; }
