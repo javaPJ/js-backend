@@ -30,23 +30,33 @@ exports.login = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
+	sql = `SELECT email FROM token WHERE email = "${email}";`;
 	rows = await connection.query(sql,() =>{connection.release();});
 
-	if (rows[0] === undefined) {
-		[body,status] = [{"message" : "your id or password id wrong"}, 403];
-	} else { 
-
-		[body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; 
-
-		sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
+	if(rows[0] != undefined) { 
+		sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
 		rows = await connection.query(sql,() =>{connection.release();});
-	}
 
+		[body, status,token, refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
+		sql = `UPDATE token SET accessToken = "${token}", refreshToken = "${refreshToken}" WHERE email = "${email}";`;
+	}
+	else{
+		sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
+		rows = await connection.query(sql,() =>{connection.release();});
+
+		if (rows[0] === undefined) {
+			[body,status] = [{"message" : "your id or password id wrong"}, 403];
+		} else { 
+			[body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; 
+
+			sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
+			rows = await connection.query(sql,() =>{connection.release();});
+		}
+	}
 	ctx.status = status;
 	ctx.body = body;
 	ctx.cookies.set('access_token', token, { httpOnly: true });
-  ctx.cookies.set("refresh_token", refreshToken, { httpOnly: true });
+	ctx.cookies.set("refresh_token", refreshToken, { httpOnly: true });
 });
 
 //로그 아웃할 때 사용하는 api O
@@ -74,7 +84,7 @@ exports.signup = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `INSERT INTO user	 VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${pass}");`;
+	sql = `INSERT INTO user VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${pass}");`;
 	rows = await connection.query(sql, () => {connection. release();});
 
 	if(rows){ [body,status] = ['', 201]; }
@@ -153,25 +163,25 @@ exports.emailCheck = (async (ctx,next) => {
 
 //비밀번호를 찾을 때 사용하는 api O
 exports.findPassword = (async (ctx,next) => {  
-	const { id, email } = ctx.request.body;
+	const { email } = ctx.request.body;
 	let sql, rows, pass, body, status;
 
-	sql = `SELECT num FROM user WHERE name = '${id}' AND email = '${email}';`;
+	sql = `SELECT num FROM user WHERE email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
-	if(rows[0] === undefined){ [body, status] = [{"message" : "id or email is wrong"}, 404] }
+	if(rows[0] === undefined){ [body, status] = [{"message" : "email is wrong"}, 404] }
 	else { 
 		pass = await controller.createRandomString();
 		
-		const password = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
+		const password = crypto.createHmac('sha256', process.env.secret).update(`${pass}`).digest('hex');
 
-		sql = `UPDATE user SET password = "${password}" WHERE name = "${id}";`;
+		sql = `UPDATE user SET password = "${password}" WHERE email = "${email}";`;
 		rows = await connection.query(sql, () => {connection.release();});
 		
 		await transporter.sendMail({
 			from: process.env.MAILID,
 			to: `${email}`,
-			subject: 'Your pass',
+			subject: 'Your password',
 			text: `${pass}`
 		});
 
