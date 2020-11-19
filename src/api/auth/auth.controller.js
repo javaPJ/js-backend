@@ -102,7 +102,7 @@ exports.idCheck = (async (ctx,next) => {
 	sql = `SELECT email FROM USER WHERE email = '${email}'`;
 	rows = await connection.query(sql, () => {connection. release();});
 	
-	if(rows[0] === undefined){ [body, status] = ["", 200] }
+	if(rows[0] === undefined){ [body, status] = ["", 200]; }
 	else { [body, status] = [{"message" : "you can't use that id"}, 403] };
 
 	ctx.body = body;
