@@ -20,7 +20,7 @@ exports.createProject = (async (ctx,next) => {
   const { name } = ctx.request.body;
   const { color } = ctx.request.body;
   let status,body,sql;
-
+  console.log(ctx.request);
   if(authentication != ''){
     sql = `
     INSERT team(num,name,code,color,leader) 
@@ -35,38 +35,39 @@ exports.createProject = (async (ctx,next) => {
   ctx.body = body;
 });
 
-//스케줄 생성 api test R
+//스케줄 생성 api 
 exports.createSchedule = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
   const { team } = ctx.request.body;//팀
-  const { stat } = ctx.request.body;//속성/현재 상황
+  const { stat } = ctx.request.body;//속성/현재 상황/속성 없는지 판단하는 코드 만들어야됨
   const { color } = ctx.request.body;//색깔
   const { title } = ctx.request.body;//스레드 제목
   const { contents } = ctx.request.body;//스레드 내용
   const { startDate } = ctx.request.body;//스케줄 시작 날짜
   const { endDate } = ctx.request.body;//스케줄 완료 날짜
   const { writer } = ctx.request.body;//스레드 작성자
-  const { member } = ctx.request.body;//멘션된 멤버
+  const { member } = ctx.request.body;//멘션된 멤버/존재하고 팀에 있는 멤버인지 확인하는 코드 필요
   let status,body,sql,rows;
 
 
   if(authentication != ''){
+    sql = `SELECT name FROM status WHERE team ='${team}', '${stat}';`;
+    rows = await connection.query(sql,() =>{connection.release();});
+    
 
     sql = `
     INSERT property(team,status,color,index,title,contents,startDate,endDate,writer) 
     VALUES('${team}', '${stat}', '${color}', (SELECT MAX(index) FROM property)+1, '${title}', '${contents}', '${startDate}', '${startDate}','${writer}');`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    await connection.query(sql,() =>{connection.release();});
 
     member.forEach(async member => {
       sql = `
       INSERT mention(team,status, properties, user) 
-      VALUES((SELECT num FROM team WHERE name = '${team}'), (SELECT MAX(num) FROM property)+1, (SELECT num FROM user WHERE name = '${member}'));`;
+      VALUES((SELECT num FROM team WHERE name = '${team}'), (SELECT MAX(num) FROM property)+1, (SELECT user FROM teamMate WHERE user = (SELECT num FROM user WHERE name = '${member}')));`;
       await connection.query(sql,() =>{connection.release();});
     });
 
-    if (rows) { [body,status] = ['', 201]; }
-    else{ [body,status] = [{"message" : "err for something"}, 403]; }
-  
+    [body,status] = ['', 201];
   }else{ [body,status] = [{"message" : "your token is wrong"}, 404]; }
 
 
@@ -86,7 +87,7 @@ exports.readProject = (async (ctx,next) => {
     SELECT color.team,status.team,teammate.teamMate 
     FROM team JOIN teamMate 
     ON team.name = teamMate.team 
-    WHERE name = '${team}';`;
+    WHERE team.name = '${team}';`;
     rows = await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = [rows,200]; }
@@ -164,7 +165,7 @@ exports.settingProject = (async (ctx,next) => {
 
 //스케줄 위치 변경 api X
 exports.updateSchedulePosition = (async (ctx,next) => {  
-  onsole.log();
+  console.log();
 
 });
 
