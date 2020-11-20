@@ -5,6 +5,6 @@ const account = new Router();
 import accountCtrl from './account.controller';
 
 account.post('/profile', accountCtrl.profile);
-account.patch('/changeprofile', accountCtrl.changeProfile);
+account.patch('/profile', accountCtrl.changeProfile);
 
 module.exports = account;
