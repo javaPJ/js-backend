@@ -37,17 +37,19 @@ exports.login = (async (ctx,next) => {
 		sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
 		rows = await connection.query(sql,() =>{connection.release();});
 
-		[body, status,token, refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
+		[status,token, refreshToken] = [201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
+		[body] = [{"accessToken" : token, "refreshToken":refreshToken}];
 		sql = `UPDATE token SET accessToken = "${token}", refreshToken = "${refreshToken}" WHERE email = "${email}";`;
 	}
 	else{
 		sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
 		rows = await connection.query(sql,() =>{connection.release();});
 
-		if (rows[0] === undefined) {
+		if (rows[0] == undefined) {
 			[body,status] = [{"message" : "your id or password id wrong"}, 403];
 		} else { 
-			[body,status,token,refreshToken] = ['', 201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)]; 
+			[status,token,refreshToken] = [201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
+			[body] = [{"accessToken" : token, "refreshToken":refreshToken}];
 
 			sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
 			rows = await connection.query(sql,() =>{connection.release();});
@@ -55,8 +57,6 @@ exports.login = (async (ctx,next) => {
 	}
 	ctx.status = status;
 	ctx.body = body;
-	ctx.cookies.set('access_token', token, { httpOnly: true });
-	ctx.cookies.set("refresh_token", refreshToken, { httpOnly: true });
 });
 
 //로그 아웃할 때 사용하는 api O
@@ -102,7 +102,7 @@ exports.idCheck = (async (ctx,next) => {
 	sql = `SELECT email FROM user WHERE email = '${email}'`;
 	rows = await connection.query(sql, () => {connection. release();});
 	
-	if(rows[0] === undefined){ [body, status] = ["", 200]; }
+	if(rows[0] == undefined){ [body, status] = ["", 200]; }
 	else { [body, status] = [{"message" : "you can't use that id"}, 403] };
 
 	ctx.body = body;
@@ -114,7 +114,7 @@ exports.emailSend = (async (ctx,next) => {
 	const { email } = ctx.request.body;
 	let sql, rows,body, code, status;
 
-	sql = `SELECT email FROM emailCheck WHERE email = '${email}';`;
+	sql = `SELECT * FROM emailCheck WHERE email = '${email}';`;
 	rows = await connection.query(sql, () => {connection. release();});
 
 	code = Math.floor(Math.random() * 1000000)+100000;
@@ -122,7 +122,7 @@ exports.emailSend = (async (ctx,next) => {
    	code = code - 100000;
 	}
 
-	if(rows[0] === undefined){
+	if(rows[0] == undefined){
 		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
 		rows = await connection.query(sql, () => {connection. release();});
 
@@ -149,7 +149,7 @@ exports.emailCheck = (async (ctx,next) => {
 	sql = `SELECT email FROM emailCheck WHERE code = '${code}' AND email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
-	if(rows[0] === undefined){
+	if(rows[0] == undefined){
 		[body,status] = [{"message" : "code is wrong"}, 404];
 	}
 	else{
@@ -169,7 +169,7 @@ exports.findPassword = (async (ctx,next) => {
 	sql = `SELECT num FROM user WHERE email = '${email}';`;
 	rows = await connection.query(sql, () => {connection.release();});
 
-	if(rows[0] === undefined){ [body, status] = [{"message" : "email is wrong"}, 404] }
+	if(rows[0] == undefined){ [body, status] = [{"message" : "email is wrong"}, 404] }
 	else { 
 		pass = await controller.createRandomString();
 		
@@ -200,13 +200,13 @@ exports.refreshToken = (async (ctx,next) => {
 	sql = `SELECT email FROM token WHERE refreshToken = '${refreshtoken}';`;
 	rows = await connection.query(sql, () => {connection. release();});
 
-	if(rows[0] === undefined){
+	if(rows[0] == undefined){
 		[body, status] = [{"message" : "not correct refresh token"}, 404];
 	}else{
-		[body, status, token] = ["", 202, await jwt.jwtsign(rows[0]['name'])];
+		[status, token] = [202, await jwt.jwtsign(rows[0]['name'])];
+		[body] = [{"accessToken" : token}]
 	}
 
 	ctx.body = body;
 	ctx.status = status;
-	ctx.cookies.set('access_token', token, { httpOnly: true });
 });
