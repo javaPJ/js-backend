@@ -124,18 +124,21 @@ exports.emailSend = (async (ctx,next) => {
 
 	if(rows[0] == undefined){
 		sql = `INSERT INTO emailCheck(code, email) VALUE ("${code}", "${email}");`;
-		rows = await connection.query(sql, () => {connection. release();});
-
-		await transporter.sendMail({
-			from: process.env.MAILID,
-			to: `${email}`, //email로 바꿀 예정
-			subject: 'HELLO',
-			text: `${code}`
-		});
-
-		[body, status] = ["", 202];
+		rows = await connection.query(sql, () => {connection. release();});	
 	}
-	else{ [body, status] = [{"message" : "email already sent"}, 403] };
+	else{ 
+		sql = `UPDATE emailCheck set code = "${code}";`;
+		rows = await connection.query(sql, () => {connection. release();});	
+	};
+
+	await transporter.sendMail({
+		from: process.env.MAILID,
+		to: `${email}`, //email로 바꿀 예정
+		subject: 'HELLO',
+		text: `${code}`
+	});
+
+	[body, status] = ["", 202];
 
 	ctx.body = body;
 	ctx.status = status;
