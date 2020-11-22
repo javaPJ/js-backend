@@ -9,7 +9,7 @@ module.exports = (Sequelize, sequelize) => {
         allowNull: false,
       },
       team: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       status: {
@@ -33,17 +33,15 @@ module.exports = (Sequelize, sequelize) => {
         allowNull: false,
       },
       startDate: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       endDate: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       writer: {
-        type: Sequelize.STRING(50),
-        defaultValue: "Sequelize.NOW",
-
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       date: {

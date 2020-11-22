@@ -1,5 +1,6 @@
 import mariadb from 'mariadb';//mariadb 사용 모듈
 import crypto from 'crypto';//암호화 모듈
+import pin from '../lib/pin';//암호화 모듈
 
 import dotenv from 'dotenv';//환경변수를 코드에서 제거하기 위한 모듈
 dotenv.config();
@@ -14,7 +15,7 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 
 const initialize = (async () =>{
   const password = crypto.createHmac('sha256', process.env.secret).update('1234').digest('hex');
-  let sql,rows,i;
+  let sql,rows,i,ins;
 
   console.log('유저 테이블 이니셜라이징 시작');
   for (i = 0; i < 20; i++) {
@@ -26,7 +27,8 @@ const initialize = (async () =>{
   rows = await connection.query(sql,() =>{connection.release();});
   console.log('팀 테이블 이니셜라이징 시작');
   for (i = 0; i < 5; i++) {
-    sql = `INSERT team VALUES(CONCAT('T-',REPLACE(UUID(),'-','')),'team${i+1}','코드를 만들 방법이 필요함','R','${rows[i]['num']}');`;
+    ins = await pin.makePin('team','code');
+    sql = `INSERT team VALUES(CONCAT('T-',REPLACE(UUID(),'-','')),'team${i+1}','${ins}','R','${rows[i]['num']}');`;
     await connection.query(sql,() =>{connection.release();});
   }
 
