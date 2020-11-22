@@ -15,7 +15,7 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 
 //프로필 불러오기 api O
 exports.profile = (async (ctx,next) => {
-  let authentication = await jwt.jwtverify(ctx.header.authentication);;
+  let authentication = await jwt.jwtverify(ctx.header.authentication);
   let status,body,sql,rows,rows1;
 
   if(authentication != ''){
