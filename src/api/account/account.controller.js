@@ -15,20 +15,36 @@ const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 �
 
 //프로필 불러오기 api O
 exports.profile = (async (ctx,next) => {
-  let authentication = await jwt.jwtverify(ctx.header.authentication);;
-  let status,body,sql,rows,rows1;
+  let authentication = await jwt.jwtverify(ctx.header.authentication);
+  let status,body,sql,rows,rows1,rows2,team;
 
   if(authentication != ''){
     sql = `SELECT name,email FROM user WHERE num = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    sql = `SELECT team FROM teamMate WHERE user = '${authentication}' UNION
-           SELECT num as team FROM team WHERE leader = '${authentication}';`;
+
+    sql = `SELECT num as team, name as teamName FROM team WHERE leader = '${authentication}';`;
     rows1 = await connection.query(sql,() =>{connection.release();});
 
-    if (rows1[0] == undefined) { rows[0]['team'] = []; }
-    else { rows[0]['team'] = rows1; }
+    sql = `SELECT teamMate.team, team.name as teamName
+    FROM teamMate, team
+    WHERE teamMate.team = team.num AND teamMate.user = '${authentication}';`;
+    rows2 = await connection.query(sql,() =>{connection.release();});
 
-    if (rows[0] != ''){ [body,status] = [rows[0], 200]; }
+
+    console.log(rows[0]);
+    console.log(rows1[0]);
+    console.log(rows2[0]);
+    
+    console.log([rows1[0], rows2]);
+
+    body = [
+      rows[0],
+      rows1,
+      rows2
+    ];
+
+
+    if (rows[0] != ''){ status = 200; }
     else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
   
   }else{ [body,status] = [{'message' : 'your token is wrong'},404]; }
