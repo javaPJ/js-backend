@@ -9,7 +9,9 @@ dotenv.config();
 
 const transporter = nodemailer.createTransport({
 	service: process.env.MAILSERVICE,
-	port : 465,
+	port : 587,
+  secure  : false,
+  requireTLS : true,
 	auth : {
 		user : process.env.MAILID,
 		pass : process.env.MAILPASSWORD
