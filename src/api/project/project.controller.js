@@ -103,7 +103,7 @@ exports.readProject = (async (ctx,next) => {
 
   if(authentication != ''){
 
-    sql = `SELECT team.num, team.name, team.color, team.leader, team.code user.name as leadername
+    sql = `SELECT team.num, team.name, team.color, team.leader, team.code, user.name as leadername
     FROM user, team
     WHERE team.leader = user.num AND team.name = '${team}';`;
     rows = await connection.query(sql,() =>{connection.release();});
