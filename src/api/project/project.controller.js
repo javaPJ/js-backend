@@ -103,28 +103,27 @@ exports.readProject = (async (ctx,next) => {
 
   if(authentication != ''){
 
-    sql = `SELECT color,leader FROM team WHERE num = '${team}';`;
+    sql = `SELECT team.num, team.color, team.leader, user.name
+    FROM user, team
+    WHERE team.leader = user.num AND team.name = '${team}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    sql = `SELECT user FROM teamMate WHERE team = '${team}';`;
+
+    console.log(rows);
+
+    sql = `SELECT teamMate.user, user.name
+    FROM teamMate, user
+    WHERE teamMate.user = user.num AND teamMate.team = '${rows[0]['num']}';`;
     rows1 = await connection.query(sql,() =>{connection.release();});
-    sql = `SELECT name FROM status WHERE team = '${team}';`;
+
+    sql = `SELECT name FROM status WHERE team = '${rows[0]['num']}';`;
     rows2 = await connection.query(sql,() =>{connection.release();});
 
-    teammate.push(rows[0]['leader']);
 
-    if (rows1 != undefined) {
-      rows1.map(async rows1 => { teammate.push(rows1['user']); });
-    }
-        
-    if (rows2[0] == undefined) {
-      rows2 = ' ';
-    }
-
-    body = {
-      'color' : rows[0]['color'],
-      'teammate' : teammate,
-      'status' : rows2
-    };
+    body = [
+      rows[0],
+      rows1,
+      rows2
+    ];
 
     if (rows[0] != undefined){ [body,status] = [body,200]; }
     else{ [body,status] = [{"message" : "your data is wrong"},404]; }
@@ -166,7 +165,7 @@ exports.joinProject = (async (ctx,next) => {
 
   if(authentication != ''){
     sql = `INSERT INTO  teamMate(team,user) 
-    VALUES((SELECT num FROM team WHERE code = '${pin}'),(SELECT num FROM user WHERE num = '${authentication}'));`;
+    VALUES((SELECT num FROM team WHERE code = '${pin}'),'${authentication}');`;
     await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = ["",200]; }
