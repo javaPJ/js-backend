@@ -20,7 +20,7 @@ module.exports = (Sequelize, sequelize) => {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      createTime: {
+      lastCheck: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.fn('now')
       }
