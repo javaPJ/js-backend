@@ -19,18 +19,10 @@ const initialize = (async () =>{
 
   console.log('유저 테이블 이니셜라이징 시작');
   for (i = 0; i < 20; i++) {
-    sql = `INSERT user VALUES(CONCAT('U-',REPLACE(UUID(),'-','')),'user${i+1}','user${i+1}@gmail.com','${password}');`;
+    sql = `INSERT user VALUES(CONCAT('U-',REPLACE(UUID(),'-','')),'user${i+1}','user${i+1}@gmail.com','${password}',NOW());`;
     await connection.query(sql,() =>{connection.release();});
   }
 
-  sql = `SELECT num FROM user LIMIT 5;`;
-  rows = await connection.query(sql,() =>{connection.release();});
-  console.log('팀 테이블 이니셜라이징 시작');
-  for (i = 0; i < 5; i++) {
-    ins = await pin.makePin('team','code');
-    sql = `INSERT team VALUES(CONCAT('T-',REPLACE(UUID(),'-','')),'team${i+1}','${ins}','R','${rows[i]['num']}');`;
-    await connection.query(sql,() =>{connection.release();});
-  }
 
   return console.log("initialize process done");
 });
