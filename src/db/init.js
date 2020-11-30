@@ -19,7 +19,7 @@ const initialize = (async () =>{
 
   console.log('유저 테이블 이니셜라이징 시작');
   for (i = 0; i < 20; i++) {
-    sql = `INSERT user VALUES(CONCAT('U-',REPLACE(UUID(),'-','')),'user${i+1}','user${i+1}@gmail.com','${password}',NOW());`;
+    sql = `INSERT user VALUES(CONCAT('U-',REPLACE(UUID(),'-','')),'user${i+1}','user${i+1}@gmail.com','${password}', NOW());`;
     await connection.query(sql,() =>{connection.release();});
   }
 
