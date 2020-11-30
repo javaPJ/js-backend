@@ -168,9 +168,7 @@ exports.joinProject = (async (ctx,next) => {
     VALUES((SELECT num FROM team WHERE code = '${pin}'),'${authentication}');`;
     await connection.query(sql,() =>{connection.release();});
     
-    if (rows[0] != ''){ [body,status] = ["",200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-  
+    [body,status] = ["",200];
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
 
