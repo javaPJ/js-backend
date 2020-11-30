@@ -110,7 +110,7 @@ exports.readProject = (async (ctx,next) => {
 
     console.log(rows);
 
-    sql = `SELECT teamMate.user, user.name
+    sql = `SELECT teamMate.user, user.name, user.email, user.lastCheck
     FROM teamMate, user
     WHERE teamMate.user = user.num AND teamMate.team = '${rows[0]['num']}';`;
     rows1 = await connection.query(sql,() =>{connection.release();});

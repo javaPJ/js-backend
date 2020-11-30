@@ -20,6 +20,10 @@ module.exports = (Sequelize, sequelize) => {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      createTime: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.fn('now')
+      }
     },
     { freezeTableName: true }
   );

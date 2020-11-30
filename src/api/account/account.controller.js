@@ -31,19 +31,7 @@ exports.profile = (async (ctx,next) => {
     order by team.createTime asc;`;
     rows2 = await connection.query(sql,() =>{connection.release();});
 
-
-    console.log(rows[0]);
-    console.log(rows1[0]);
-    console.log(rows2[0]);
-    
-    console.log([rows1[0], rows2]);
-
-    body = [
-      rows[0],
-      rows1,
-      rows2
-    ];
-
+    body = [ rows[0], rows1, rows2 ];
 
     if (rows[0] != ''){ status = 200; }
     else{ [body,status] = [{'message' : 'your data is wrong'},403]; }
