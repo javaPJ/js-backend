@@ -105,17 +105,17 @@ exports.readProject = (async (ctx,next) => {
 
     sql = `SELECT team.num, team.name, team.color, team.leader, team.code, user.name as leadername
     FROM user, team
-    WHERE team.leader = user.num AND team.name = '${team}';`;
+    WHERE team.leader = user.num AND team.num = '${team}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
     console.log(rows);
 
     sql = `SELECT teamMate.user, user.name, user.email, user.lastCheck
     FROM teamMate, user
-    WHERE teamMate.user = user.num AND teamMate.team = '${rows[0]['num']}';`;
+    WHERE teamMate.user = user.num AND teamMate.team = '${team}';`;
     rows1 = await connection.query(sql,() =>{connection.release();});
 
-    sql = `SELECT name FROM status WHERE team = '${rows[0]['num']}';`;
+    sql = `SELECT name FROM status WHERE team = '${team}';`;
     rows2 = await connection.query(sql,() =>{connection.release();});
 
 
