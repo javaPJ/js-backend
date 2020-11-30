@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 	auth : {
 		user : process.env.MAILID,
 		pass : process.env.MAILPASSWORD
-	}
+	}	
 });
 
 const connection = mariadb.createPool({//db 연결용 변수, 내부 변수는 환경변수로 설정.
@@ -69,9 +69,9 @@ exports.logout = (async (ctx, next) => {
 		sql = `DELETE FROM token WHERE accessToken = "${auth}";`;
 		rows = await connection.query(sql,() =>{connection.release();});
 
-		[body, status] = ["", 201];
+		[body, status] = ["", 200];
 
-	}else{ [body,status] = [ {"message" : "your token is wrong"},404]; }
+	}else{ [body,status] = [ {"message" : "your token is wrong"}, 401]; }
 
 	ctx.body = body;
 	ctx.status = status;
@@ -207,7 +207,7 @@ exports.refreshToken = (async (ctx,next) => {
 		[body, status] = [{"message" : "not correct refresh token"}, 404];
 	}else{
 		[status, token] = [202, await jwt.jwtsign(rows[0]['name'])];
-		[body] = [{"accessToken" : token}]
+		[body] = [{"accessToken" : token}];
 	}
 
 	ctx.body = body;
