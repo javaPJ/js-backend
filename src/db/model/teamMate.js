@@ -16,6 +16,10 @@ module.exports = (Sequelize, sequelize) => {
         type: Sequelize.STRING(50),
         allowNull: false,
       },
+      joinTime: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.fn('now')
+      }
     },
     { freezeTableName: true }
   );
