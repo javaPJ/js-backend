@@ -25,7 +25,7 @@ exports.profile = (async (ctx,next) => {
     sql = `SELECT num as team, name as teamName, createTime FROM team WHERE leader = '${authentication}' order by createTime asc;`;
     rows1 = await connection.query(sql,() =>{connection.release();});
 
-    sql = `SELECT teamMate.team, team.name as teamName, teamMate.team.joinTime as createTime
+    sql = `SELECT teamMate.team, team.name as teamName, teamMate.joinTime as createTime
     FROM teamMate, team
     WHERE teamMate.team = team.num AND teamMate.user = '${authentication}'
     order by team.createTime asc;`;
