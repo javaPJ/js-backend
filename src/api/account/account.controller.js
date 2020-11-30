@@ -22,12 +22,13 @@ exports.profile = (async (ctx,next) => {
     sql = `SELECT name,email FROM user WHERE num = '${authentication}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
-    sql = `SELECT num as team, name as teamName FROM team WHERE leader = '${authentication}';`;
+    sql = `SELECT num as team, name as teamName, createTime FROM team WHERE leader = '${authentication}' order by createTime asc;`;
     rows1 = await connection.query(sql,() =>{connection.release();});
 
     sql = `SELECT teamMate.team, team.name as teamName
     FROM teamMate, team
-    WHERE teamMate.team = team.num AND teamMate.user = '${authentication}';`;
+    WHERE teamMate.team = team.num AND teamMate.user = '${authentication}'
+    order by team.createTime asc;`;
     rows2 = await connection.query(sql,() =>{connection.release();});
 
 
