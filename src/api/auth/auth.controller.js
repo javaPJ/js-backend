@@ -41,7 +41,12 @@ exports.login = (async (ctx,next) => {
 
 		[status,token, refreshToken] = [201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
 		[body] = [{"accessToken" : token, "refreshToken":refreshToken}];
+
 		sql = `UPDATE token SET accessToken = "${token}", refreshToken = "${refreshToken}" WHERE email = "${email}";`;
+		rows = await connection.query(sql,() =>{connection.release();});
+
+		sql = `UPDATE user SET lastCheck = NOW() WHERE email = "${email}";`;
+		rows = await connection.query(sql,() =>{connection.release();});
 	}
 	else{
 		sql = `SELECT num FROM user WHERE email = '${email}' AND password = '${pass}';`;
@@ -49,26 +54,30 @@ exports.login = (async (ctx,next) => {
 
 		if (rows[0] == undefined) {
 			[body,status] = [{"message" : "your id or password id wrong"}, 403];
-		} else { 
+		} 
+		else { 
 			[status,token,refreshToken] = [201, await jwt.jwtsign(rows[0]['num']), await jwt.jwtrefresh(email)];
 			[body] = [{"accessToken" : token, "refreshToken":refreshToken}];
 
 			sql = `INSERT INTO token VALUES ("${email}", "${token}", "${refreshToken}");`;
 			rows = await connection.query(sql,() =>{connection.release();});
+
+			sql = `UPDATE user SET lastCheck = NOW() WHERE email = "${email}";`;
+			rows = await connection.query(sql,() =>{connection.release();});
 		}
 	}
+
 	ctx.status = status;
 	ctx.body = body;
 });
 
 //로그 아웃할 때 사용하는 api O
 exports.logout = (async (ctx, next) => {
-	const auth = ctx.header.authentication;
-	const authentication = await jwt.jwtverify(auth);
+	const authentication = ctx.header.authentication;
 	let sql, rows, body, status;
 
 	if(authentication != ''){
-		sql = `DELETE FROM token WHERE accessToken = "${auth}";`;
+		sql = `DELETE FROM token WHERE accessToken = "${authentication}";`;
 		rows = await connection.query(sql,() =>{connection.release();});
 
 		[body, status] = ["", 200];
