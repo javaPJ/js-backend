@@ -295,26 +295,19 @@ exports.kickTeammate = (async (ctx,next) => {
 //프로젝트 삭제 api test R
 exports.deleteProject = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
-  const { team } = ctx.request.body;
+  const { team } = ctx.header;
   let status,body,sql,rows;
 
-
   if(authentication != ''){
-    sql = `SELECT num FROM team WHERE leader = '${authentication}', name = '${team}';`;
-    rows = await connection.query(sql,() =>{connection.release();});
         
-    sql = `DELETE FROM teamMate 
-    WHERE pin = (SELECT num FROM team WHERE leader = '${authentication}', name = '${team}');`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    sql = `DELETE FROM teamMate WHERE team = '${team}';`;
+    await connection.query(sql,() =>{connection.release();});
       
-    sql = `DELETE FROM team 
-    WHERE pin = (SELECT num FROM team WHERE leader = '${authentication}', name = '${team}'), leader = '${authentication}';`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    sql = `DELETE FROM team WHERE num = '${team}'AND leader = '${authentication}';`;
+    await connection.query(sql,() =>{connection.release();});
 
 
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-
+    [body,status] = ['',201];
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
 
