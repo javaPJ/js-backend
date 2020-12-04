@@ -147,7 +147,7 @@ exports.readSchedule = (async (ctx,next) => {
     rows = await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},404]; }
+    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
   
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
@@ -202,7 +202,7 @@ exports.updateSchedulePosition = (async (ctx,next) => {
 
 });
 
-//스케줄 수정 api test R
+//스케줄 수정 api O
 exports.updateSchedule = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
   const { num } = ctx.request.body;
@@ -222,7 +222,7 @@ exports.updateSchedule = (async (ctx,next) => {
     WHERE num = '${num}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
-    sql = `DELETE mention WHERE properties = '${num}';`;
+    sql = `DELETE FROM mention WHERE properties = '${num}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
     member.forEach(async member => {
