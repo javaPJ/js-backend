@@ -147,7 +147,7 @@ exports.readSchedule = (async (ctx,next) => {
     rows = await connection.query(sql,() =>{connection.release();});
     
     if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},404]; }
+    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
   
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
@@ -202,7 +202,7 @@ exports.updateSchedulePosition = (async (ctx,next) => {
 
 });
 
-//스케줄 수정 api test R
+//스케줄 수정 api O
 exports.updateSchedule = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
   const { num } = ctx.request.body;
@@ -222,7 +222,7 @@ exports.updateSchedule = (async (ctx,next) => {
     WHERE num = '${num}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
-    sql = `DELETE mention WHERE properties = '${num}';`;
+    sql = `DELETE FROM mention WHERE properties = '${num}';`;
     rows = await connection.query(sql,() =>{connection.release();});
 
     member.forEach(async member => {
@@ -242,48 +242,42 @@ exports.updateSchedule = (async (ctx,next) => {
   ctx.body = body;
 });
 
-//프로젝트 탈퇴 api test R
+//프로젝트 탈퇴 api O
 exports.exitProject = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
-  const { pin } = ctx.request.body;
+  const { team } = ctx.request.body;
   let status,body,sql,rows;
 
-
   if(authentication != ''){
-    sql = `DELETE FROM teamMate 
-    WHERE user = (SELECT num FROM user WHERE name = '${authentication}'), pin = (SELECT num FROM team WHERE code = '${pin}');`;
-    rows = await connection.query(sql,() =>{connection.release();});
-    
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-  
-  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
+    sql = `DELETE FROM teamMate WHERE user = '${authentication}' AND team = '${team}';`;
+    await connection.query(sql,() =>{connection.release();});
 
+    [body,status] = [rows,200];
+  }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
   ctx.status = status;
   ctx.body = body;
 });
 
-//팀원 강퇴 api test R
+//팀원 강퇴 api O
 exports.kickTeammate = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
   const { team } = ctx.request.body;
-  const { id } = ctx.request.body;
+  const { teammate } = ctx.request.body;
   let status,body,sql,rows;
 
 
   if(authentication != ''){
-    sql = `SELECT num FROM team WHERE leader = '${authentication}', name = '${team}';`;
+    sql = `SELECT leader FROM team WHERE num = '${team}';`;
     rows = await connection.query(sql,() =>{connection.release();});
-    if (rows[0] != '') {
+
+    if (rows[0]['leader'] == authentication) {
         
-      sql = `DELETE FROM teamMate 
-      WHERE user = (SELECT num FROM user WHERE name = '${id}'), pin = '${rows}';`;
-      rows = await connection.query(sql,() =>{connection.release();});
+      sql = `DELETE FROM teamMate WHERE user = '${teammate}' AND team = '${team}';`;
+      await connection.query(sql,() =>{connection.release();});
       
-      if (rows[0] != ''){ [body,status] = [rows,200]; }
-      else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-    }else{ [body,status] = [{"message" : "your data is wrong"},403]; }
+      [body,status] = [rows,200];
+    }else{ [body,status] = [{"message" : "your not a leader"},403]; }
   
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
@@ -292,29 +286,22 @@ exports.kickTeammate = (async (ctx,next) => {
   ctx.body = body;
 });
 
-//프로젝트 삭제 api test R
+//프로젝트 삭제 api O
 exports.deleteProject = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
-  const { team } = ctx.request.body;
+  const { team } = ctx.header;
   let status,body,sql,rows;
 
-
   if(authentication != ''){
-    sql = `SELECT num FROM team WHERE leader = '${authentication}', name = '${team}';`;
-    rows = await connection.query(sql,() =>{connection.release();});
         
-    sql = `DELETE FROM teamMate 
-    WHERE pin = (SELECT num FROM team WHERE leader = '${authentication}', name = '${team}');`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    sql = `DELETE FROM teamMate WHERE team = '${team}';`;
+    await connection.query(sql,() =>{connection.release();});
       
-    sql = `DELETE FROM team 
-    WHERE pin = (SELECT num FROM team WHERE leader = '${authentication}', name = '${team}'), leader = '${authentication}';`;
-    rows = await connection.query(sql,() =>{connection.release();});
+    sql = `DELETE FROM team WHERE num = '${team}'AND leader = '${authentication}';`;
+    await connection.query(sql,() =>{connection.release();});
 
 
-    if (rows[0] != ''){ [body,status] = [rows,200]; }
-    else{ [body,status] = [{"message" : "your data is wrong"},403]; }
-
+    [body,status] = ['',201];
   }else{ [body,status] = [{"message" : "your token is wrong"},404]; }
 
 
