@@ -95,7 +95,7 @@ exports.signup = (async (ctx,next) => {
 
 	const pass = crypto.createHmac('sha256', process.env.secret).update(`${password}`).digest('hex');
 
-	sql = `INSERT INTO user VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${pass}");`;
+	sql = `INSERT INTO user VALUES (CONCAT('U-',REPLACE(UUID(),'-','')),"${id}", "${email}", "${pass}",(NOW()));`;
 	rows = await connection.query(sql, () => {connection. release();});
 
 	if(rows){ [body,status] = ['', 201]; }
