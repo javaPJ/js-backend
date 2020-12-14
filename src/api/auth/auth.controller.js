@@ -138,7 +138,7 @@ exports.emailSend = (async (ctx,next) => {
 		rows = await connection.query(sql, () => {connection. release();});	
 	}
 	else{ 
-		sql = `UPDATE emailCheck set code = "${code}";`;
+		sql = `UPDATE emailCheck set code = "${code}" WHERE email = '${email}';`;
 		rows = await connection.query(sql, () => {connection. release();});	
 	};
 
