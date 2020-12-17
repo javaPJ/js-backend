@@ -248,6 +248,9 @@ exports.exitProject = (async (ctx,next) => {
   const { team } = ctx.request.body;
   let status,body,sql,rows;
 
+  console.log(team);
+  console.log(authentication);
+
   if(authentication != ''){
     sql = `DELETE FROM teamMate WHERE user = '${authentication}' AND team = '${team}';`;
     await connection.query(sql,() =>{connection.release();});
