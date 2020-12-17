@@ -245,7 +245,7 @@ exports.updateSchedule = (async (ctx,next) => {
 //프로젝트 탈퇴 api O
 exports.exitProject = (async (ctx,next) => {  
   const authentication = await jwt.jwtverify(ctx.header.authentication);
-  const { team } = ctx.request.body;
+  const { team_name } = ctx.request.body;
   let status,body,sql,rows;
 
   console.log(team);
